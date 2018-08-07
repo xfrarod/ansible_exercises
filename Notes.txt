@@ -1,0 +1,387 @@
+Order for the ansible.cfg file
+-------------------------------
+
+Order #1: Environment variable called ANSIBLE_CONFIG
+Order #2: Current Directory, ansible.cfg
+Order #3: Home Directory, ansible.cfg
+Order #4: /etc/ansible directory, ansible.cfg
+
+
+Ansible Patterns
+----------------
+
+playbooks % ansible --list-hosts all
+  hosts (3):
+    vagrant1
+    vagrant3
+    vagrant2
+playbooks % ansible --list-hosts "*"
+  hosts (3):
+    vagrant1
+    vagrant3
+    vagrant2
+playbooks %
+playbooks % ansible --list-hosts webservers
+  hosts (1):
+    vagrant1
+playbooks % ansible --list-hosts appservers
+  hosts (1):
+    vagrant2
+playbooks % ansible --list-hosts dbservers
+  hosts (1):
+    vagrant3
+playbooks % ansible --list-hosts vagrant1
+  hosts (1):
+    vagrant1
+playbooks % ansible --list-hosts "vagrant*"
+  hosts (3):
+    vagrant1
+    vagrant3
+    vagrant2
+playbooks % ansible --list-hosts webservers:appservers
+  hosts (2):
+    vagrant1
+    vagrant2
+playbooks % ansible --list-hosts "webservers[0]"
+  hosts (1):
+    vagrant1
+playbooks % ansible --list-hosts "\!webservers[0]"
+  hosts (2):
+    vagrant3
+    vagrant2
+playbooks % ansible --list-hosts "\!dbbservers"
+ [WARNING]: Could not match supplied host pattern, ignoring: dbbservers
+
+  hosts (3):
+    vagrant1
+    vagrant3
+    vagrant2
+playbooks % ansible --list-hosts "\!dbservers"
+  hosts (2):
+    vagrant1
+    vagrant2
+
+
+Ansible Add-Hoc commands
+------------------------
+
+playbooks % ansible all -m setup  ## Prints all configurations from the hosts in json format
+
+playbooks % ansible vagrant1 -m setup | more
+vagrant1 | SUCCESS => {
+    "ansible_facts": {
+        "ansible_all_ipv4_addresses": [
+            "10.0.2.15"
+        ],
+        "ansible_all_ipv6_addresses": [
+            "fe80::a00:27ff:fe19:676d"
+        ],
+        "ansible_apparmor": {
+            "status": "enabled"
+        },
+        "ansible_architecture": "x86_64",
+        "ansible_bios_date": "12/01/2006",
+        "ansible_bios_version": "VirtualBox",
+        "ansible_cmdline": {
+            "BOOT_IMAGE": "/boot/vmlinuz-3.13.0-135-generic",
+            "console": "ttyS0",
+            "ro": true,
+            "root": "UUID=652af757-70ef-4830-9f1d-5a75d6bf5da4"
+        },
+        "ansible_date_time": {
+            "date": "2017-12-01",
+            "day": "01",
+            "epoch": "1512108605",
+            "hour": "06",
+:
+
+playbooks % ansible webservers -m ping
+vagrant1 | SUCCESS => {
+    "changed": false,
+    "failed": false,
+    "ping": "pong"
+}
+playbooks % ansible "vagrant*" -m ping
+vagrant3 | SUCCESS => {
+    "changed": false,
+    "failed": false,
+    "ping": "pong"
+}
+vagrant1 | SUCCESS => {
+    "changed": false,
+    "failed": false,
+    "ping": "pong"
+}
+vagrant2 | SUCCESS => {
+    "changed": false,
+    "failed": false,
+    "ping": "pong"
+}
+playbooks % ansible "webservers" -a hostname
+vagrant1 | SUCCESS | rc=0 >>
+vagrant-ubuntu-trusty-64
+
+playbooks % ansible "webservers:appservers" -a hostname
+vagrant1 | SUCCESS | rc=0 >>
+vagrant-ubuntu-trusty-64
+
+vagrant2 | SUCCESS | rc=0 >>
+vagrant-ubuntu-trusty-64
+
+playbooks % ansible "webservers:appservers" -a hostname
+playbooks % ansible "webservers" -a "df -h"
+vagrant1 | SUCCESS | rc=0 >>
+Filesystem      Size  Used Avail Use% Mounted on
+udev            241M   12K  241M   1% /dev
+tmpfs            49M  352K   49M   1% /run
+/dev/sda1        40G  1.5G   37G   4% /
+none            4.0K     0  4.0K   0% /sys/fs/cgroup
+none            5.0M     0  5.0M   0% /run/lock
+none            245M     0  245M   0% /run/shm
+none            100M     0  100M   0% /run/user
+none            112G  105G  7.3G  94% /vagrant
+none            112G  105G  7.3G  94% /vagrant_data
+
+playbooks % ansible "webservers" -a "free -m"
+vagrant1 | SUCCESS | rc=0 >>
+             total       used       free     shared    buffers     cached
+Mem:           489        232        257          0         11        101
+-/+ buffers/cache:        119        370
+Swap:            0          0          0
+
+playbooks % ansible "webservers" -a "uptime"
+vagrant1 | SUCCESS | rc=0 >>
+ 06:15:01 up 52 min,  1 user,  load average: 0.14, 0.05, 0.05
+
+playbooks % ansible "vagrant*" -a "date"
+vagrant3 | SUCCESS | rc=0 >>
+Fri Dec  1 06:15:21 UTC 2017
+
+vagrant2 | SUCCESS | rc=0 >>
+Fri Dec  1 06:15:21 UTC 2017
+
+vagrant1 | SUCCESS | rc=0 >>
+Fri Dec  1 06:15:21 UTC 2017
+
+playbooks % echo "Francisco Rodriguez" > b
+playbooks % ansible all -m copy -a "src=b dest=/tmp/b"
+vagrant2 | SUCCESS => {
+    "changed": true,
+    "checksum": "1542eba4de5b6f25454d6fd9a6c24a7c7d77911f",
+    "dest": "/tmp/b",
+    "failed": false,
+    "gid": 1000,
+    "group": "vagrant",
+    "md5sum": "e322e3d73448ea3be350f40075dac39b",
+    "mode": "0664",
+    "owner": "vagrant",
+    "size": 20,
+    "src": "/home/vagrant/.ansible/tmp/ansible-tmp-1512109031.07-241197951369885/source",
+    "state": "file",
+    "uid": 1000
+}
+vagrant3 | SUCCESS => {
+    "changed": true,
+    "checksum": "1542eba4de5b6f25454d6fd9a6c24a7c7d77911f",
+    "dest": "/tmp/b",
+    "failed": false,
+    "gid": 1000,
+    "group": "vagrant",
+    "md5sum": "e322e3d73448ea3be350f40075dac39b",
+    "mode": "0664",
+    "owner": "vagrant",
+    "size": 20,
+    "src": "/home/vagrant/.ansible/tmp/ansible-tmp-1512109031.05-259420919134556/source",
+    "state": "file",
+    "uid": 1000
+}
+vagrant1 | SUCCESS => {
+    "changed": true,
+    "checksum": "1542eba4de5b6f25454d6fd9a6c24a7c7d77911f",
+    "dest": "/tmp/b",
+    "failed": false,
+    "gid": 1000,
+    "group": "vagrant",
+    "md5sum": "e322e3d73448ea3be350f40075dac39b",
+    "mode": "0664",
+    "owner": "vagrant",
+    "size": 20,
+    "src": "/home/vagrant/.ansible/tmp/ansible-tmp-1512109031.03-264122285079937/source",
+    "state": "file",
+    "uid": 1000
+}
+
+playbooks % ansible webservers -m file -a "dest=/tmp/b mode=600"
+vagrant1 | SUCCESS => {
+    "changed": true,
+    "failed": false,
+    "gid": 1000,
+    "group": "vagrant",
+    "mode": "0600",
+    "owner": "vagrant",
+    "path": "/tmp/b",
+    "size": 20,
+    "state": "file",
+    "uid": 1000
+}
+playbooks % ansible webservers -m file -a "dest=/tmp/abc mode=755 state=directory"
+vagrant1 | SUCCESS => {
+    "changed": true,
+    "failed": false,
+    "gid": 1000,
+    "group": "vagrant",
+    "mode": "0755",
+    "owner": "vagrant",
+    "path": "/tmp/abc",
+    "size": 4096,
+    "state": "directory",
+    "uid": 1000
+}
+playbooks % ansible webservers -m file -a "dest=/tmp/abc mode=755 state=directory"
+vagrant1 | SUCCESS => {
+    "changed": false,
+    "failed": false,
+    "gid": 1000,
+    "group": "vagrant",
+    "mode": "0755",
+    "owner": "vagrant",
+    "path": "/tmp/abc",
+    "size": 4096,
+    "state": "directory",
+    "uid": 1000
+}
+playbooks % ansible webservers -m file -a "dest=/tmp/abc mode=755 state=absent"
+vagrant1 | SUCCESS => {
+    "changed": true,
+    "failed": false,
+    "path": "/tmp/abc",
+    "state": "absent"
+}
+playbooks % ansible webservers -m apt -a "name=nginx state=presetn"
+vagrant1 | FAILED! => {
+    "changed": false,
+    "failed": true,
+    "msg": "value of state must be one of: installed,latest,removed,absent,present,build-dep, got: presetn"
+}
+
+
+playbooks % ansible webservers -m apt -b -a "name=nginx state=absent"
+vagrant1 | SUCCESS => {
+    "changed": false,
+    "failed": false
+}
+playbooks % ansible webservers -m apt -b -a "name=nginx state=present"
+vagrant1 | SUCCESS => {
+    "cache_update_time": 1511905159,
+    "cache_updated": false,
+    "changed": true,
+    "failed": false,
+    "stderr": "",
+    "stderr_lines": [],
+    "stdout": "Reading package lists...\nBuilding dependency tree...\nReading state information...\nThe following NEW packages will be installed:\n  nginx\n0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.\nNeed to get 0 B/5394 B of archives.\nAfter this operation, 96.3 kB of additional disk space will be used.\nSelecting previously unselected package nginx.\n(Reading database ... 63160 files and directories currently installed.)\nPreparing to unpack .../nginx_1.4.6-1ubuntu3.8_all.deb ...\nUnpacking nginx (1.4.6-1ubuntu3.8) ...\nSetting up nginx (1.4.6-1ubuntu3.8) ...\n",
+    "stdout_lines": [
+        "Reading package lists...",
+        "Building dependency tree...",
+        "Reading state information...",
+        "The following NEW packages will be installed:",
+        "  nginx",
+        "0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.",
+        "Need to get 0 B/5394 B of archives.",
+        "After this operation, 96.3 kB of additional disk space will be used.",
+        "Selecting previously unselected package nginx.",
+        "(Reading database ... 63160 files and directories currently installed.)",
+        "Preparing to unpack .../nginx_1.4.6-1ubuntu3.8_all.deb ...",
+        "Unpacking nginx (1.4.6-1ubuntu3.8) ...",
+        "Setting up nginx (1.4.6-1ubuntu3.8) ..."
+    ]
+}
+playbooks % ansible webservers -m apt -b -a "name=nginx state=latest"
+vagrant1 | SUCCESS => {
+    "cache_update_time": 1511905159,
+    "cache_updated": false,
+    "changed": false,
+    "failed": false
+}
+
+
+playbooks % ansible webservers -m service -b -a "name=nginx state=started"
+vagrant1 | SUCCESS => {
+    "changed": false,
+    "failed": false,
+    "name": "nginx",
+    "state": "started"
+}
+playbooks % ansible webservers -m service -b -a "name=nginx state=restarted"
+vagrant1 | SUCCESS => {
+    "changed": true,
+    "failed": false,
+    "name": "nginx",
+    "state": "started"
+}
+playbooks % ansible webservers -m service -b -a "name=nginx state=stopped"
+vagrant1 | SUCCESS => {
+    "changed": true,
+    "failed": false,
+    "name": "nginx",
+    "state": "stopped"
+}
+
+playbooks % ansible -a "netstat -an" dbservers
+vagrant3 | SUCCESS | rc=0 >>
+Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State
+tcp        0      0 127.0.0.1:3306          0.0.0.0:*               LISTEN
+tcp        0      0 0.0.0.0:34443           0.0.0.0:*               LISTEN
+tcp        0      0 0.0.0.0:111             0.0.0.0:*               LISTEN
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN
+tcp        0      0 10.0.2.15:22            10.0.2.2:49772          ESTABLISHED
+tcp6       0      0 :::111                  :::*                    LISTEN
+tcp6       0      0 :::22                   :::*                    LISTEN
+tcp6       0      0 :::37918                :::*                    LISTEN
+udp        0      0 0.0.0.0:68              0.0.0.0:*
+udp        0      0 127.0.0.1:852           0.0.0.0:*
+udp        0      0 0.0.0.0:32361           0.0.0.0:*
+udp        0      0 0.0.0.0:111             0.0.0.0:*
+udp        0      0 0.0.0.0:57813           0.0.0.0:*
+udp        0      0 0.0.0.0:809             0.0.0.0:*
+udp6       0      0 :::111                  :::*
+udp6       0      0 :::59016                :::*
+udp6       0      0 :::809                  :::*
+udp6       0      0 :::57387                :::*
+Active UNIX domain sockets (servers and established)
+Proto RefCnt Flags       Type       State         I-Node   Path
+unix  2      [ ACC ]     SEQPACKET  LISTENING     7187     /run/udev/control
+unix  2      [ ACC ]     STREAM     LISTENING     9029     /var/run/acpid.socket
+unix  2      [ ACC ]     STREAM     LISTENING     6539     @/com/ubuntu/upstart
+unix  7      [ ]         DGRAM                    8837     /dev/log
+unix  2      [ ACC ]     STREAM     LISTENING     43174    /var/run/mysqld/mysqld.sock
+unix  2      [ ACC ]     STREAM     LISTENING     7846     /run/rpcbind.sock
+unix  2      [ ACC ]     STREAM     LISTENING     8675     /var/run/dbus/system_bus_socket
+unix  3      [ ]         STREAM     CONNECTED     9233
+unix  3      [ ]         STREAM     CONNECTED     53687    /var/run/dbus/system_bus_socket
+unix  3      [ ]         STREAM     CONNECTED     53678
+unix  3      [ ]         DGRAM                    7221
+unix  2      [ ]         DGRAM                    9026
+unix  2      [ ]         DGRAM                    30446
+unix  3      [ ]         STREAM     CONNECTED     8736     /var/run/dbus/system_bus_socket
+unix  2      [ ]         DGRAM                    53529
+unix  3      [ ]         STREAM     CONNECTED     7843     @/com/ubuntu/upstart
+unix  3      [ ]         STREAM     CONNECTED     8713
+unix  3      [ ]         STREAM     CONNECTED     8663
+unix  3      [ ]         STREAM     CONNECTED     8738
+unix  3      [ ]         STREAM     CONNECTED     7170
+unix  3      [ ]         STREAM     CONNECTED     53679
+unix  3      [ ]         STREAM     CONNECTED     8806
+unix  3      [ ]         STREAM     CONNECTED     8714
+unix  3      [ ]         STREAM     CONNECTED     7819
+unix  3      [ ]         STREAM     CONNECTED     8739
+unix  3      [ ]         STREAM     CONNECTED     8753     @/com/ubuntu/upstart
+unix  2      [ ]         DGRAM                    53702
+unix  2      [ ]         DGRAM                    9284
+unix  3      [ ]         STREAM     CONNECTED     7182     @/com/ubuntu/upstart
+unix  3      [ ]         STREAM     CONNECTED     9234     /var/run/dbus/system_bus_socket
+unix  3      [ ]         STREAM     CONNECTED     53686
+unix  3      [ ]         STREAM     CONNECTED     8807     /var/run/dbus/system_bus_socket
+unix  3      [ ]         STREAM     CONNECTED     8735
+unix  3      [ ]         DGRAM                    7220
+
