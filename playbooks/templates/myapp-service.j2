@@ -1,0 +1,13 @@
+[Unit]
+Description="app.js script"
+After=network.target
+
+[Service]
+RemainAfterExit=yes
+ExecStart=/usr/bin/nodejs {{ nodeservers.node_apps_location }}/app/app.js > stdout.txt 2> stderr
+WorkingDirectory={{ nodeservers.node_apps_location }}/app
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target

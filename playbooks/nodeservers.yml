@@ -1,0 +1,7 @@
+---
+- hosts: nodeservers
+  gather_facts: yes
+  become: true
+  roles:
+    - nodeservers
+ 

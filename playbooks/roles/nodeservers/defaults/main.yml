@@ -1,0 +1,5 @@
+---
+nodeservers:
+  node_apps_location: /usr/local/opt/node
+  ghost_user_group: ghost
+  ghost_user: ghost

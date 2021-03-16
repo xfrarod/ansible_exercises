@@ -1,11 +1,10 @@
 ---
 - hosts: appservers
+  gather_facts: yes
   become: true
-  tasks:
-    - name: install apache2
-      apt: name={{item}} state=present update_cache=yes
-      with_items:
-        - apache2
-        - libapache2-mod-wsgi
-        - python-pip
-        - python-virtualenv
+  roles:
+    - appservers
+
+  handlers:
+    - name: start apache2
+      service: name=apache2 state=started

@@ -1,7 +1,13 @@
 ---
-- hosts: appservers
-  become: true
-  tasks:
+
+    - name: install apache2
+      apt: name={{item}} state=present update_cache=yes
+      with_items:
+      - apache2
+      - libapache2-mod-wsgi
+      - python-pip
+      - python-virtualenv
+
     # Create a random string used to construct temporary path to store interm
     - shell: uuidgen
       register: uuid_build
@@ -37,3 +43,5 @@
 
     - name: "Create the working subdirectory {{ result_dir }}"
       file: path="./{{ result_dir }}" state=directory mode=0755
+      notify: start apache2
+

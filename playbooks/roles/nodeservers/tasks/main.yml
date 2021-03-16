@@ -1,0 +1,45 @@
+---
+- name: Disable firewall
+  service: name=ufw state=stopped enabled=no
+
+- name: Install Node.js and npm
+  apt: name=npm state=present update_cache=yes
+
+- name: Ensure Node.js app folder exists
+  file: "path={{ nodeservers.node_apps_location }} state=directory"
+  
+- name: Copy example Node.js app to server
+  copy: "src=files/app dest={{ nodeservers.node_apps_location }}"
+ 
+- name: Configure NPM
+  shell: npm config set strict-ssl false
+  
+- name: Install express dependency
+  shell: npm install express --save
+  args:
+    chdir: "{{ nodeservers.node_apps_location }}/app"
+  register: npm_finished
+
+- name: lay down myapp systemd unit file
+  template:
+    src: myapp-service.j2
+    dest: /etc/systemd/system/myapp.service
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Install systemd and npm
+  apt: name=systemd state=present update_cache=yes
+
+- name: ensure myapp service is enabled
+  systemd:
+    name: myapp.service
+    enabled: yes
+    state: started
+    masked: no
+
+#- name: start app
+#  shell: "nodejs app.js > stdout.txt 2> stderr &"
+#  args:
+#    chdir: "{{ nodeservers.node_apps_location }}/app"
+#  when: npm_finished.changed

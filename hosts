@@ -1,0 +1,15 @@
+[webservers]
+vagrant1
+
+[appservers]
+vagrant2 ansible_host=127.0.0.1 ansible_port=2223
+
+[dbservers]
+vagrant3 ansible_host=127.0.0.1 ansible_port=2224
+
+[nodeservers]
+vagrant1
+
+[webservers:vars]
+ansible_host=127.0.0.1
+ansible_port=2222
