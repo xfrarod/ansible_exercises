@@ -92,7 +92,7 @@ Excersice 2 - Provision Nginx on webservers
 ::
 
     # Install nginx with apt module (Bad state value)
-    $ ansible webservers -m apt -a "name=nginx state=presetn"
+    $ ansible webservers -m apt -b -a "name=nginx state=presetn"
     vagrant1 | FAILED! => {
         "changed": false,
         "msg": "value of state must be one of: absent, build-dep, installed, latest, present, removed, present, got: presetn"
