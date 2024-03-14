@@ -1,0 +1,35 @@
+####################################################################################
+#
+#
+#####################################################################################
+
+version: '2.0'
+
+services:
+
+  # ansible:
+  #   container_name: ansible
+  #   image: webdevops/ansible
+  #   restart: always
+  #   environment:
+  #     - ANSIBLE_CONFIG=/ansible.cfg
+  #   volumes:
+  #   - ./:/app
+  #   - ~/.vagrant.d/insecure_private_key:/insecure_private_key:ro
+  #   - ./ansible.cfg:/ansible.cfg
+  #   command: tail -F anything
+  #   network_mode: host
+
+  ansible_aws:
+    container_name: ansible_aws
+    image: webdevops/ansible
+    restart: always
+    environment:
+      - ANSIBLE_CONFIG=/ansible.cfg
+    volumes:
+    - ./:/app
+    - ~/.ssh/tecmilenio-key.pem:/tecmilenio-key.pem
+    - ./ansible_aws.cfg:/ansible.cfg
+    - ./hosts_aws:/hosts
+    command: tail -F anything
+    network_mode: host

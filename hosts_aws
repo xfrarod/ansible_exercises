@@ -1,0 +1,15 @@
+[webservers]
+instance-one 
+
+[appservers]
+instance-two ansible_host=54.196.229.206 ansible_port=22
+
+[dbservers]
+instance-three ansible_host=44.220.132.178 ansible_port=22
+
+[nodeservers]
+instance-one
+
+[webservers:vars]
+ansible_host=3.87.169.215
+ansible_port=22

@@ -193,6 +193,9 @@ Excersice 3 - Check if Nginx is running on webservers hosts
     </body>
     </html>
 
+    Nota: Alternativamente se puede validar con ansible corriendo el siguiente comando
+    $ ansible webservers -a "curl http://localhost" 
+
 
 Excersice 4 - Stop Nginx on webservers
 --------------------------------------
@@ -212,6 +215,9 @@ Excersice 5 - Check if Nignx is stopped
 
     $ curl http://localhost:8080
     curl: (56) Recv failure: Connection reset by peer
+
+    Nota: Alternativamente se puede validar con ansible corriendo el siguiente comando
+    $ ansible webservers -a "curl http://localhost" 
 
 Excersice 6 - Destroy all
 -------------------------
